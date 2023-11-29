@@ -18,3 +18,8 @@ This will start a local lambda function server as well as a `vite` instance.
 ```sh
 npm start
 ```
+
+### test data
+You would want to uncomment [the line where we create test data](https://github.com/nichoth/lofi-test-instantdb/blob/main/src/state.ts#L40). Only run it once (no refreshes), because otherwise it will create duplicate data.
+
+Import `doTransaction` from the file [src/mock-data.ts](./src/mock-data.ts).
