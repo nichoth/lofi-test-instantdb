@@ -1,11 +1,10 @@
 import { html } from 'htm/preact'
-import { render } from 'preact'
-import {
-    Primary as ButtonOutlinePrimary,
-    ButtonOutline
-} from '@nichoth/components/htm/button-outline'
+import { FunctionComponent, render } from 'preact'
+// import {
+//     Primary as ButtonOutlinePrimary,
+//     ButtonOutline
+// } from '@nichoth/components/htm/button-outline'
 import { createDebug } from '@nichoth/debug'
-import ky from 'ky'
 import { State } from './state.js'
 import Router from './routes/index.js'
 import '@nichoth/components/button-outline.css'
@@ -15,10 +14,7 @@ const router = Router()
 const state = State()
 const debug = createDebug()
 
-// example of calling our API
-const json = await ky.get('/api/example').json()
-
-export function Example () {
+const Example:FunctionComponent<{ state }> = function Example ({ state }) {
     debug('rendering example...')
     const match = router.match(state.route.value)
     const ChildNode = match.action(match, state.route)
@@ -29,23 +25,8 @@ export function Example () {
         </div>`
     }
 
-    function plus (ev) {
-        ev.preventDefault()
-        State.Increase(state)
-    }
-
-    function minus (ev) {
-        ev.preventDefault()
-        State.Decrease(state)
-    }
-
     return html`<div>
         <h1>example</h1>
-
-        <h2>the API response</h2>
-        <pre>
-            ${JSON.stringify(json, null, 2)}
-        </pre>
 
         <h2>routes</h2>
         <ul>
@@ -54,25 +35,40 @@ export function Example () {
             <li><a href="/ccc">ccc</a></li>
         </ul>
 
-        <h2>counter</h2>
-        <div>
-            <div>count: ${state.count.value}</div>
-            <ul class="count-controls">
-                <li>
-                    <${ButtonOutlinePrimary} onClick=${plus}>
-                        plus
-                    </${ButtonOutline}>
-                </li>
-                <li>
-                    <${ButtonOutline} onClick=${minus}>
-                        minus
-                    </${ButtonOutline}>
-                </li>
-            </ul>
-        </div>
-
-        <${ChildNode} />
+        <${ChildNode} state=${state} />
     </div>`
 }
 
-render(html`<${Example} />`, document.getElementById('root')!)
+render(html`<${Example} state=${state} />`, document.getElementById('root')!)
+
+// <h2>counter</h2>
+// <div>
+//     <div>count: ${state.count.value}</div>
+//     <ul class="count-controls">
+//         <li>
+//             <${ButtonOutlinePrimary} onClick=${plus}>
+//                 plus
+//             </${ButtonOutline}>
+//         </li>
+//         <li>
+//             <${ButtonOutline} onClick=${minus}>
+//                 minus
+//             </${ButtonOutline}>
+//         </li>
+//     </ul>
+// </div>
+
+// <h2>the API response</h2>
+// <pre>
+//     ${JSON.stringify(json, null, 2)}
+// </pre>
+
+// function plus (ev) {
+//     ev.preventDefault()
+//     State.Increase(state)
+// }
+
+// function minus (ev) {
+//     ev.preventDefault()
+//     State.Decrease(state)
+// }
