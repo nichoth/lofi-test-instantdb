@@ -1,7 +1,9 @@
 import { html } from 'htm/preact'
 import Debug from '@nichoth/debug'
 import { FunctionComponent } from 'preact'
+import { Accordion } from '@nichoth/components/htm/accordion'
 import { AppState } from '../state'
+import '@nichoth/components/accordion.css'
 
 const debug = Debug()
 
@@ -29,7 +31,12 @@ function Goals ({ goals }:{
     return html`<ul class="goals">
         ${goals.value.data!.goals.map(goal => {
             return html`<li class="goal">
-                ${goal.title}
+                <${Accordion}>
+                    <summary>${goal.title}</summary>
+                    <ul>${goal.todos.map(todo => {
+                        return html`<li>${todo.title}</li>`
+                    })}</ul>
+                <//>
             </li>`
         })}
     </ul>`
