@@ -179,6 +179,7 @@ State.Complete = function (todoId:string) {
 }
 
 State.Uncomplete = function (todoId:string) {
+    debug('**uncomplete**', todoId)
     transact([
         tx.todos[todoId].update({ isComplete: false })
     ])
