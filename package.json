@@ -17,7 +17,7 @@
   },
   "dependencies": {
     "@instantdb/core": "^0.4.3",
-    "@nichoth/components": "^0.13.6",
+    "@nichoth/components": "^0.14.0",
     "@nichoth/routes": "^3.0.7",
     "@preact/signals": "^1.2.2",
     "htm": "^3.1.1",
