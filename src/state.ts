@@ -178,6 +178,10 @@ State.Complete = function (todoId:string) {
     ])
 }
 
+/**
+ * Set an item as not complete
+ * @param {string} todoId ID of the item
+ */
 State.Uncomplete = function (todoId:string) {
     debug('**uncomplete**', todoId)
     transact([
@@ -189,11 +193,11 @@ State.Uncomplete = function (todoId:string) {
  * Create a signal for a query
  * @param {ReturnType<typeof getDB>} db The instant DB
  * @param {object} query The query
- * @returns Unsubribe function and query state
+ * @returns Unsubscribe function and query state
  */
 function querySignal<T> (db:ReturnType<typeof getDB>, query):{
     unsubscribe:()=>void,
-    state:Signal<({ isLoading?:boolean, data?:T })>
+    state:Signal<({ isLoading:boolean, data?:T })>
 } {
     const queryState = signal({ isLoading: true })
 
