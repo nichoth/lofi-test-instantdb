@@ -2,7 +2,7 @@ import { html } from 'htm/preact'
 import Debug from '@nichoth/debug'
 import { FunctionComponent } from 'preact'
 import { Accordion } from '@nichoth/components/htm/accordion'
-import { AppState } from '../state'
+import { State, AppState } from '../state'
 import '@nichoth/components/accordion.css'
 
 const debug = Debug()
@@ -19,22 +19,61 @@ export const HomeRoute:FunctionComponent<{
             html`<div>Loading...</div>` :
             html`
                 <h2>Goals</h2>
-                <${Goals} goals=${state.goalsWithTodos} />
+                <${Goals} state=${state} goals=${state.goalsWithTodos} />
             `
         }
     </div>`
 }
 
-function Goals ({ goals }:{
-    goals:AppState['goalsWithTodos']
+/**
+ * Update something
+ * transact([
+ *   tx.goals[myId].update({ title: 'eat' })
+ * ])
+ */
+
+/**
+ * Use the `update` action to create entities also.
+ *
+ * ```js
+ * transact([tx.goals[id()].update({ title: 'eat' })])
+ * ```
+ *
+ * This creates a new `goal`
+ */
+
+function Goals ({ goals, state }:{
+    goals:AppState['goalsWithTodos'];
+    state:ReturnType<typeof State>
 }) {
+    function check (ev) {
+        const el = ev.target
+        const isComplete = el.checked
+        const { todoId } = el.dataset
+        if (isComplete) {
+            return State.Complete(todoId)
+        }
+
+        // is not complete
+        State.Uncomplete(todoId)
+    }
+
     return html`<ul class="goals">
         ${goals.value.data!.goals.map(goal => {
-            return html`<li class="goal">
+            return html`<li data-goalId="${goal.id}" class="goal">
                 <${Accordion}>
                     <summary>${goal.title}</summary>
                     <ul>${goal.todos.map(todo => {
-                        return html`<li>${todo.title}</li>`
+                        return html`<li id="${todo.id}">
+                            <input class="toggle" type="checkbox"
+                                checked=${todo.isComplete}
+                                name="completed"
+                                id=${todo.id}
+                                onChange=${check}
+                                data-todo-id=${todo.id}
+                            />
+                            ${' ' + todo.title}
+                        </li>`
                     })}</ul>
                 <//>
             </li>`

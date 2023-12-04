@@ -21,7 +21,7 @@ window.transact = transact
 // @ts-ignore
 window.tx = tx
 
-// an ID I copied from the console
+// an ID I copied from the browser console
 const HEALTH_ID = '6b746a95-0b5c-42fe-81d6-dcfb3b24bde9'
 
 export type AppState = ReturnType<typeof State>
@@ -33,7 +33,8 @@ export type Goal = {
 
 export type Todo = {
     title:string,
-    id:string
+    id:string,
+    isComplete?:boolean
 }
 
 export type GoalsWithTodos = ({
@@ -42,6 +43,11 @@ export type GoalsWithTodos = ({
         goals: (Goal & { todos: Todo[] })[]
     }
 })
+
+/**
+ * How do we update something
+ * Need the item's ID
+ */
 
 /**
  * Setup any state
@@ -161,6 +167,24 @@ export function State ():{
 }
 
 /**
+ * Mark an item as complete.
+ * @param {string} todoId The ID of the item you are updating
+ */
+State.Complete = function (todoId:string) {
+    debug('**doing a transaction**', todoId)
+
+    transact([
+        tx.todos[todoId].update({ isComplete: true })
+    ])
+}
+
+State.Uncomplete = function (todoId:string) {
+    transact([
+        tx.todos[todoId].update({ isComplete: false })
+    ])
+}
+
+/**
  * Create a signal for a query
  * @param db The instant DB
  * @param query The query
@@ -173,6 +197,7 @@ function querySignal<T> (db:ReturnType<typeof getDB>, query):{
     const queryState = signal({ isLoading: true })
 
     const unsubscribe = db.subscribeQuery(query, (resp) => {
+        debug('**got an update**', resp, query)
         queryState.value = { isLoading: false, ...resp }
     })
 

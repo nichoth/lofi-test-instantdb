@@ -34,4 +34,8 @@ ul.goals {
         padding-top: 1rem;
         padding-bottom: 0.5rem;
     }
+
+    summary {
+        width: fit-content;
+    }
 }
