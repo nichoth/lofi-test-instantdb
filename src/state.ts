@@ -1,8 +1,17 @@
 import { Signal, signal, effect } from '@preact/signals'
 import Route from 'route-event'
-import { getDB, init, transact, instatx } from '@instantdb/core'
+import {
+    getDB,
+    init,
+    transact,
+    instatx,
+} from '@instantdb/core'
 import Debug from '@nichoth/debug'
 const { tx } = instatx
+
+/**
+ * @see {@link https://docs.instantdb.com/docs/instaql The docs}
+ */
 
 const APP_ID = import.meta.env.VITE_APP_ID
 const debug = Debug()
@@ -12,8 +21,33 @@ window.transact = transact
 // @ts-ignore
 window.tx = tx
 
-// an ID I copied from the console
+// an ID I copied from the browser console
 const HEALTH_ID = '6b746a95-0b5c-42fe-81d6-dcfb3b24bde9'
+
+export type AppState = ReturnType<typeof State>
+
+export type Goal = {
+    title:string,
+    id:string
+}
+
+export type Todo = {
+    title:string,
+    id:string,
+    isComplete?:boolean
+}
+
+export type GoalsWithTodos = ({
+    isLoading?:boolean,
+    data?: {
+        goals: (Goal & { todos: Todo[] })[]
+    }
+})
+
+/**
+ * How do we update something
+ * Need the item's ID
+ */
 
 /**
  * Setup any state
@@ -22,7 +56,7 @@ const HEALTH_ID = '6b746a95-0b5c-42fe-81d6-dcfb3b24bde9'
  */
 export function State ():{
     route:Signal<string>;
-    count:Signal<number>;
+    goalsWithTodos:Signal<GoalsWithTodos>;
     _setRoute:(path:string)=>void;
     _instant:ReturnType<typeof getDB>;
 } {  // eslint-disable-line indent
@@ -35,11 +69,12 @@ export function State ():{
 
     const db = getDB()
 
-    debug('the database', db)
-
+    /**
+     * uncomment this to insert things into DB
+     */
     // doTransaction()
 
-    const query = {
+    const queryHealth = {
         goals: {
             $: {
                 where: {
@@ -49,6 +84,9 @@ export function State ():{
         },
     }
 
+    /**
+     * This is todos, grouped by goals
+     */
     const nestedQuery = {
         goals: {
             todos: {},
@@ -76,12 +114,18 @@ export function State ():{
         unsubscribe: filterUnsub,
         state: filterState
     } = querySignal(db, filterQuery)
+
     const { unsubscribe, state: goalsSignal } = querySignal(db, goalsQuery)
-    const { unsubscribe: unsubscribeOne, state: oneSignal } = querySignal(db, query)
+
+    const {
+        unsubscribe: unsubscribeHealth,
+        state: healthSignal
+    } = querySignal(db, queryHealth)
+
     const {
         unsubscribe: unsubNested,
         state: nestedState
-    } = querySignal(db, nestedQuery)
+    } = querySignal<{ goals:(Goal & { todos: Todo[] })[] }>(db, nestedQuery)
 
     effect(() => {
         debug('filtered results, with related docs', filterState.value)
@@ -94,8 +138,8 @@ export function State ():{
     })
 
     effect(() => {
-        debug('filering...', oneSignal.value)
-        return unsubscribeOne
+        debug('filering...', healthSignal.value)
+        return unsubscribeHealth
     })
 
     effect(() => {
@@ -106,7 +150,7 @@ export function State ():{
     const state = {
         _setRoute: onRoute.setRoute.bind(onRoute),
         _instant: db,
-        count: signal<number>(0),
+        goalsWithTodos: nestedState,
         route: signal<string>(location.pathname + location.search)
     }
 
@@ -122,12 +166,22 @@ export function State ():{
     return state
 }
 
-State.Increase = function (state:ReturnType<typeof State>) {
-    state.count.value++
+/**
+ * Mark an item as complete.
+ * @param {string} todoId The ID of the item you are updating
+ */
+State.Complete = function (todoId:string) {
+    debug('**doing a transaction**', todoId)
+
+    transact([
+        tx.todos[todoId].update({ isComplete: true })
+    ])
 }
 
-State.Decrease = function (state:ReturnType<typeof State>) {
-    state.count.value--
+State.Uncomplete = function (todoId:string) {
+    transact([
+        tx.todos[todoId].update({ isComplete: false })
+    ])
 }
 
 /**
@@ -136,15 +190,16 @@ State.Decrease = function (state:ReturnType<typeof State>) {
  * @param query The query
  * @returns Unsubribe function and query state
  */
-function querySignal (db:ReturnType<typeof getDB>, query):{
+function querySignal<T> (db:ReturnType<typeof getDB>, query):{
     unsubscribe:()=>void,
-    state
+    state:Signal<({ isLoading?:boolean, data?:T })>
 } {
     const queryState = signal({ isLoading: true })
 
-    const unsub = db.subscribeQuery(query, (resp) => {
+    const unsubscribe = db.subscribeQuery(query, (resp) => {
+        debug('**got an update**', resp, query)
         queryState.value = { isLoading: false, ...resp }
     })
 
-    return { unsubscribe: unsub, state: queryState }
+    return { unsubscribe, state: queryState }
 }

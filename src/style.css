@@ -25,3 +25,17 @@ pre {
     padding: 2rem;
     background-color: #d3d3d363;
 }
+
+ul.goals {
+    list-style: none;
+    padding: 0;
+
+    & details {
+        padding-top: 1rem;
+        padding-bottom: 0.5rem;
+    }
+
+    summary {
+        width: fit-content;
+    }
+}
