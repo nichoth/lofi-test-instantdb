@@ -7,6 +7,7 @@ import {
     instatx,
 } from '@instantdb/core'
 import Debug from '@nichoth/debug'
+// import { doTransaction } from './mock-data'
 const { tx } = instatx
 
 /**
