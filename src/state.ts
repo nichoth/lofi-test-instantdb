@@ -187,8 +187,8 @@ State.Uncomplete = function (todoId:string) {
 
 /**
  * Create a signal for a query
- * @param db The instant DB
- * @param query The query
+ * @param {ReturnType<typeof getDB>} db The instant DB
+ * @param {object} query The query
  * @returns Unsubribe function and query state
  */
 function querySignal<T> (db:ReturnType<typeof getDB>, query):{
