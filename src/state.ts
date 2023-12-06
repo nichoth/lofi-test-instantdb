@@ -200,12 +200,12 @@ function querySignal<T> (db:ReturnType<typeof getDB>, query):{
     unsubscribe:()=>void,
     state:Signal<({ isLoading:boolean, data?:T })>
 } {
-    const queryState = signal({ isLoading: true })
+  const queryState = signal({ isLoading: true })
 
-    const unsubscribe = db.subscribeQuery(query, (resp) => {
-        debug('**got an update**', resp, query)
-        queryState.value = { isLoading: false, ...resp }
-    })
-
-    return { unsubscribe, state: queryState }
+  db.subscribeQuery(query, (resp) => {
+    debug('**got an update**', resp, query)
+    queryState.value = { isLoading: false, ...resp }
+  })
+  const unsubscribe = () => null
+  return { unsubscribe, state: queryState }
 }
