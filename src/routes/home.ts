@@ -4,24 +4,27 @@ import { FunctionComponent } from 'preact'
 import { Accordion } from '@nichoth/components/htm/accordion'
 import { State, AppState } from '../state'
 import '@nichoth/components/accordion.css'
+import { doTransaction, clearData } from '../mock-data'
 
 const debug = Debug()
 
-export const HomeRoute:FunctionComponent<{
-    state:AppState
-}> = function ({ state }) {
-    debug('state in home', state)
+export const HomeRoute: FunctionComponent<{
+  state: AppState
+}> = function({ state }) {
+  debug('state in home', state)
 
-    return html`<div class="route home">
+  return html`<div class="route home">
         <h2>home route</h2>
 
         ${state.goalsWithTodos.value.isLoading ?
-            html`<div>Loading...</div>` :
-            html`
+      html`<div>Loading...</div>` :
+      html`
                 <h2>Goals</h2>
+                <button onClick=${() => doTransaction()}>Load Data</button>
+                <button onClick=${() => clearData(state.goalsWithTodos)}>Delete Data</button>
                 <${Goals} state=${state} goals=${state.goalsWithTodos} />
             `
-        }
+    }
     </div>`
 }
 
