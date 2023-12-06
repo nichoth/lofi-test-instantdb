@@ -200,12 +200,15 @@ function querySignal<T> (db:ReturnType<typeof getDB>, query):{
     unsubscribe:()=>void,
     state:Signal<({ isLoading:boolean, data?:T })>
 } {
-  const queryState = signal({ isLoading: true })
+    const queryState = signal({ isLoading: true })
 
-  db.subscribeQuery(query, (resp) => {
-    debug('**got an update**', resp, query)
-    queryState.value = { isLoading: false, ...resp }
-  })
-  const unsubscribe = () => null
-  return { unsubscribe, state: queryState }
+    // const unsubscribe = db.subscribeQuery(query, (resp) => {
+    db.subscribeQuery(query, (resp) => {
+        debug('**got an update**', resp, query)
+        queryState.value = { isLoading: false, ...resp }
+    })
+
+    // b/c isntantDB live sync fails if we return the real unsubscribe function
+    const unsubscribe = () => null
+    return { unsubscribe, state: queryState }
 }

@@ -10,10 +10,10 @@ const debug = Debug()
 
 export const HomeRoute: FunctionComponent<{
   state: AppState
-}> = function({ state }) {
-  debug('state in home', state)
+}> = function ({ state }) {
+    debug('state in home', state)
 
-  return html`<div class="route home">
+    return html`<div class="route home">
         <h2>home route</h2>
 
         ${state.goalsWithTodos.value.isLoading ?

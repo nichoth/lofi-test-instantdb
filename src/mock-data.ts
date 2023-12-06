@@ -11,48 +11,48 @@ export const healthId = id()
 export const workId = id()
 
 export const ids = [
-  workoutId,
-  proteinId,
-  sleepId,
-  standupId,
-  reviewPRsId,
-  focusId,
-  healthId,
-  workId
+    workoutId,
+    proteinId,
+    sleepId,
+    standupId,
+    reviewPRsId,
+    focusId,
+    healthId,
+    workId
 ]
 
-export function doTransaction() {
-  transact([
-    tx.todos[workoutId].update({ title: 'Go on a run' }),
-    tx.todos[proteinId].update({ title: 'Drink protein' }),
-    tx.todos[sleepId].update({ title: 'Go to bed early' }),
-    tx.todos[standupId].update({ title: 'Do standup' }),
-    tx.todos[reviewPRsId].update({ title: 'Review PRs' }),
-    tx.todos[focusId].update({ title: 'Code a bunch' }),
-    /**
+export function doTransaction () {
+    transact([
+        tx.todos[workoutId].update({ title: 'Go on a run' }),
+        tx.todos[proteinId].update({ title: 'Drink protein' }),
+        tx.todos[sleepId].update({ title: 'Go to bed early' }),
+        tx.todos[standupId].update({ title: 'Do standup' }),
+        tx.todos[reviewPRsId].update({ title: 'Review PRs' }),
+        tx.todos[focusId].update({ title: 'Code a bunch' }),
+        /**
      * @NOTE -- this is where we link to other data
      */
-    tx.goals[healthId]
-      .update({ title: 'Get fit!' })
-      .link({ todos: workoutId })
-      .link({ todos: proteinId })
-      .link({ todos: sleepId }),
-    tx.goals[workId]
-      .update({ title: 'Get promoted!' })
-      .link({ todos: standupId })
-      .link({ todos: reviewPRsId })
-      .link({ todos: focusId }),
-  ])
+        tx.goals[healthId]
+            .update({ title: 'Get fit!' })
+            .link({ todos: workoutId })
+            .link({ todos: proteinId })
+            .link({ todos: sleepId }),
+        tx.goals[workId]
+            .update({ title: 'Get promoted!' })
+            .link({ todos: standupId })
+            .link({ todos: reviewPRsId })
+            .link({ todos: focusId }),
+    ])
 }
 
-export function clearData(data) {
-  console.log(data.value.data);
-  const queryData = data.value.data;
-  const goalIds = queryData.goals.map(goal => goal.id);
-  const todoIds = queryData.goals.map(goal => goal.todos.map(todo => todo.id)).flat();
-  transact([
-    ...goalIds.map(eid => tx.goals[eid].delete()),
-    ...todoIds.map(eid => tx.todos[eid].delete())
-  ])
+export function clearData (data) {
+    console.log(data.value.data)
+    const queryData = data.value.data
+    const goalIds = queryData.goals.map(goal => goal.id)
+    const todoIds = queryData.goals.map(goal => goal.todos.map(todo => todo.id)).flat()
+    transact([
+        ...goalIds.map(eid => tx.goals[eid].delete()),
+        ...todoIds.map(eid => tx.todos[eid].delete())
+    ])
 }
 
