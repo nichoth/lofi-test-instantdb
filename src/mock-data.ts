@@ -29,9 +29,10 @@ export function doTransaction () {
         tx.todos[standupId].update({ title: 'Do standup' }),
         tx.todos[reviewPRsId].update({ title: 'Review PRs' }),
         tx.todos[focusId].update({ title: 'Code a bunch' }),
+
         /**
-     * @NOTE -- this is where we link to other data
-     */
+         * @NOTE -- this is where we link to other data
+         */
         tx.goals[healthId]
             .update({ title: 'Get fit!' })
             .link({ todos: workoutId })

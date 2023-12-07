@@ -7,7 +7,6 @@ import {
     instatx,
 } from '@instantdb/core'
 import Debug from '@nichoth/debug'
-// import { doTransaction } from './mock-data'
 const { tx } = instatx
 
 /**
@@ -70,11 +69,6 @@ export function State ():{
 
     const db = getDB()
 
-    /**
-     * uncomment this to insert things into DB
-     */
-    // doTransaction()
-
     const queryHealth = {
         goals: {
             $: {
@@ -100,7 +94,7 @@ export function State ():{
      * We can fetch a specific entity in a namespace as well as it's
      * related associations
      */
-    const filterQuery = {
+    const { state: filterState } = querySignal(db, {
         goals: {
             $: {
                 where: {
@@ -109,43 +103,29 @@ export function State ():{
             },
             todos: {},
         },
-    }
+    })
+
+    const { state: goalsSignal } = querySignal(db, goalsQuery)
+    const { state: healthSignal } = querySignal(db, queryHealth)
 
     const {
-        unsubscribe: filterUnsub,
-        state: filterState
-    } = querySignal(db, filterQuery)
-
-    const { unsubscribe, state: goalsSignal } = querySignal(db, goalsQuery)
-
-    const {
-        unsubscribe: unsubscribeHealth,
-        state: healthSignal
-    } = querySignal(db, queryHealth)
-
-    const {
-        unsubscribe: unsubNested,
         state: nestedState
     } = querySignal<{ goals:(Goal & { todos: Todo[] })[] }>(db, nestedQuery)
 
     effect(() => {
         debug('filtered results, with related docs', filterState.value)
-        return filterUnsub
     })
 
     effect(() => {
         debug('goals!!!!!!!', goalsSignal.value)
-        return unsubscribe
     })
 
     effect(() => {
         debug('filering...', healthSignal.value)
-        return unsubscribeHealth
     })
 
     effect(() => {
         debug('nested query...', nestedState.value)
-        return unsubNested
     })
 
     const state = {
@@ -192,6 +172,7 @@ State.Uncomplete = function (todoId:string) {
 
 /**
  * Create a signal for a query
+ *
  * @param {ReturnType<typeof getDB>} db The instant DB
  * @param {object} query The query
  * @returns Unsubscribe function and query state
@@ -202,13 +183,10 @@ function querySignal<T> (db:ReturnType<typeof getDB>, query):{
 } {
     const queryState = signal({ isLoading: true })
 
-    // const unsubscribe = db.subscribeQuery(query, (resp) => {
-    db.subscribeQuery(query, (resp) => {
+    const unsubscribe = db.subscribeQuery(query, (resp) => {
         debug('**got an update**', resp, query)
         queryState.value = { isLoading: false, ...resp }
     })
 
-    // b/c isntantDB live sync fails if we return the real unsubscribe function
-    const unsubscribe = () => null
     return { unsubscribe, state: queryState }
 }

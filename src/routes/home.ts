@@ -17,14 +17,20 @@ export const HomeRoute: FunctionComponent<{
         <h2>home route</h2>
 
         ${state.goalsWithTodos.value.isLoading ?
-      html`<div>Loading...</div>` :
-      html`
+            html`<div>Loading...</div>` :
+            html`
                 <h2>Goals</h2>
-                <button onClick=${() => doTransaction()}>Load Data</button>
-                <button onClick=${() => clearData(state.goalsWithTodos)}>Delete Data</button>
+                <button onClick=${() => doTransaction()}>
+                    Load Data
+                </button>
+                <button
+                    onClick=${() => clearData(state.goalsWithTodos)}
+                >
+                    Delete Data
+                </button>
                 <${Goals} state=${state} goals=${state.goalsWithTodos} />
             `
-    }
+        }
     </div>`
 }
 
@@ -47,7 +53,7 @@ export const HomeRoute: FunctionComponent<{
 
 function Goals ({ goals, state }:{
     goals:AppState['goalsWithTodos'];
-    state:ReturnType<typeof State>
+    state:ReturnType<typeof State>;
 }) {
     function check (ev) {
         const el = ev.target
