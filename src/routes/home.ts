@@ -3,13 +3,13 @@ import Debug from '@nichoth/debug'
 import { FunctionComponent } from 'preact'
 import { Accordion } from '@nichoth/components/htm/accordion'
 import { State, AppState } from '../state'
-import '@nichoth/components/accordion.css'
 import { doTransaction, clearData } from '../mock-data'
+import '@nichoth/components/accordion.css'
 
 const debug = Debug()
 
-export const HomeRoute: FunctionComponent<{
-  state: AppState
+export const HomeRoute:FunctionComponent<{
+    state: AppState
 }> = function ({ state }) {
     debug('state in home', state)
 
@@ -20,6 +20,7 @@ export const HomeRoute: FunctionComponent<{
             html`<div>Loading...</div>` :
             html`
                 <h2>Goals</h2>
+
                 <button onClick=${() => doTransaction()}>
                     Load Data
                 </button>
@@ -28,6 +29,7 @@ export const HomeRoute: FunctionComponent<{
                 >
                     Delete Data
                 </button>
+
                 <${Goals} state=${state} goals=${state.goalsWithTodos} />
             `
         }
@@ -59,6 +61,7 @@ function Goals ({ goals, state }:{
         const el = ev.target
         const isComplete = el.checked
         const { todoId } = el.dataset
+
         if (isComplete) {
             return State.Complete(todoId)
         }

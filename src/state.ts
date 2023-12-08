@@ -1,10 +1,14 @@
+// import { blake3 } from '@noble/hashes/blake3'
+// import serialize from 'json-canon'
 import { Signal, signal, effect } from '@preact/signals'
+import timestamp from 'monotonic-timestamp'
 import Route from 'route-event'
 import {
     getDB,
     init,
     transact,
     instatx,
+    uuid as id
 } from '@instantdb/core'
 import Debug from '@nichoth/debug'
 const { tx } = instatx
@@ -38,16 +42,17 @@ export type Todo = {
 }
 
 export type GoalsWithTodos = ({
-    isLoading?:boolean,
+    isLoading?:boolean;
     data?: {
-        goals: (Goal & { todos: Todo[] })[]
+        goals: (Goal & { todos: Todo[] })[];
     }
 })
 
-/**
- * How do we update something
- * Need the item's ID
- */
+export type Node = {
+    seq:number;
+    prev:string;
+    content:string;
+}
 
 /**
  * Setup any state
@@ -57,6 +62,7 @@ export type GoalsWithTodos = ({
 export function State ():{
     route:Signal<string>;
     goalsWithTodos:Signal<GoalsWithTodos>;
+    nodes:ReturnType<typeof querySignal<Node[]>>['state']
     _setRoute:(path:string)=>void;
     _instant:ReturnType<typeof getDB>;
 } {  // eslint-disable-line indent
@@ -128,10 +134,16 @@ export function State ():{
         debug('nested query...', nestedState.value)
     })
 
+    const nodesQuery = {
+
+    }
+    const { state: nodes } = querySignal<Node[]>(db, nodesQuery)
+
     const state = {
         _setRoute: onRoute.setRoute.bind(onRoute),
         _instant: db,
         goalsWithTodos: nestedState,
+        nodes,
         route: signal<string>(location.pathname + location.search)
     }
 
@@ -152,8 +164,6 @@ export function State ():{
  * @param {string} todoId The ID of the item you are updating
  */
 State.Complete = function (todoId:string) {
-    debug('**doing a transaction**', todoId)
-
     transact([
         tx.todos[todoId].update({ isComplete: true })
     ])
@@ -164,9 +174,27 @@ State.Complete = function (todoId:string) {
  * @param {string} todoId ID of the item
  */
 State.Uncomplete = function (todoId:string) {
-    debug('**uncomplete**', todoId)
     transact([
         tx.todos[todoId].update({ isComplete: false })
+    ])
+}
+
+/**
+ * Create a new node with a link to the previous
+ * @param content Text content
+ */
+State.CreateNode = function (content:string) {
+    const newId = id()
+
+    const newNodeValue = {
+        ts: timestamp(),
+        content: { type: 'post', text: content }
+    }
+
+    transact([
+        tx.nodes[newId]
+            .update({ content })
+            .link({ nodes: '' })
     ])
 }
 
@@ -184,9 +212,17 @@ function querySignal<T> (db:ReturnType<typeof getDB>, query):{
     const queryState = signal({ isLoading: true })
 
     const unsubscribe = db.subscribeQuery(query, (resp) => {
-        debug('**got an update**', resp, query)
         queryState.value = { isLoading: false, ...resp }
     })
 
     return { unsubscribe, state: queryState }
 }
+
+// export function verify (post) {
+//     const json = serialize(post)
+
+//     if (post.seq % 100 === 0) {
+//         const hash = blake3()
+//         return verify()
+//     }
+// }

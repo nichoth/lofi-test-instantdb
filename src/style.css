@@ -7,6 +7,23 @@
     }
 }
 
+nav {
+    & ul {
+        list-style: none;
+        display: flex;
+        justify-content: space-around;
+
+        & li {
+            &.active {
+                & a {
+                    text-decoration: none;
+                }
+                border-bottom: 3px solid pink;
+            }
+        }
+    }
+}
+
 button {
     cursor: pointer;
 

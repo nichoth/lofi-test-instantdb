@@ -19,9 +19,12 @@
     "@instantdb/core": "^0.4.3",
     "@nichoth/components": "^0.14.1",
     "@nichoth/routes": "^3.0.7",
+    "@noble/hashes": "^1.3.2",
     "@preact/signals": "^1.2.2",
     "htm": "^3.1.1",
+    "json-canon": "^1.0.1",
     "ky": "^1.1.3",
+    "monotonic-timestamp": "^0.0.9",
     "preact": "^10.19.2",
     "route-event": "^4.1.10"
   },

@@ -1,12 +1,17 @@
 import { html } from 'htm/preact'
 import Router from '@nichoth/routes'
 import { HomeRoute } from './home.js'
+import { CreateRoute } from './create.js'
 
 export default function _Router ():ReturnType<Router> {
     const router = Router()
 
     router.addRoute('/', () => {
         return HomeRoute
+    })
+
+    router.addRoute('/create', () => {
+        return CreateRoute
     })
 
     router.addRoute('/aaa', () => {
